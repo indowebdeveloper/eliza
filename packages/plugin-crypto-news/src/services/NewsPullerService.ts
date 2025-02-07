@@ -199,7 +199,7 @@ export class NewsPullerService extends Service {
 
             for (const article of chainCatcher.data.list) {
                 const cached = await cacheManager.get(
-                    `cryptoNews_${article.id}`
+                    `cryptoNews_${this.runtime.agentId}_${article.id}`
                 );
                 if (!cached) {
                     // new acrticle
@@ -209,7 +209,10 @@ export class NewsPullerService extends Service {
                     // means it's not cached, then we push it to the articles
                     //articles.push(article);
                     // cache it
-                    await cacheManager.set(`cryptoNews_${article.id}`, article);
+                    await cacheManager.set(
+                        `cryptoNews_${this.runtime.agentId}_${article.id}`,
+                        article
+                    );
                     const embedding = await embed(
                         this.runtime,
                         article.description
@@ -218,7 +221,9 @@ export class NewsPullerService extends Service {
                     // put the news to knowledge as well
 
                     await this.runtime.ragKnowledgeManager.createKnowledge({
-                        id: stringToUuid(`cryptoNews_${article.id}`),
+                        id: stringToUuid(
+                            `cryptoNews_${this.runtime.agentId}_${article.id}`
+                        ),
                         agentId: this.runtime.agentId,
                         content: {
                             text: article.description,
