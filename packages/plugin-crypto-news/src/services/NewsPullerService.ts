@@ -117,13 +117,6 @@ export class NewsPullerService extends Service {
     }
 
     private async twitterLogin() {
-        // saved client
-        const tClient = this.twitterClient.findIndex(
-            (item) => item.id === this.runtime.agentId
-        );
-        if (tClient) {
-            return;
-        }
         // initiate the twitter login
         const twitterClient =
             this.runtime.clients?.twitter?.client?.twitterClient;
