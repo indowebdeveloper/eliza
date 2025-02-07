@@ -224,9 +224,10 @@ export class NewsPullerService extends Service {
                 await new Promise((resolve) => setTimeout(resolve, 2000));
             }
             //this.me = await this.twitterClient[tcIndex]?.client?.me();
+            const me = await this.twitterClient[tcIndex]?.client?.me();
             this.profiles.push({
                 id: this.runtime.agentId,
-                me: await this.twitterClient[tcIndex]?.client?.me(),
+                me,
             });
         } else {
             console.log(
