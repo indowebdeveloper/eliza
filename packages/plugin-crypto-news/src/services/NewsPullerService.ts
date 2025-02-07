@@ -405,9 +405,11 @@ export class NewsPullerService extends Service {
 
     private async generateTweet(text: any, tweetId?: string) {
         elizaLogger.log("NewsPuller : Generating tweet");
-        const profile = this.profiles.find(
+        const profileIdx = this.profiles.findIndex(
             (item) => item.id === this.runtime.agentId
         );
+        const profile = this.profiles[profileIdx].me;
+        console.log("DEBUG PROFILE: ", profile);
 
         if (!this.runtime) {
             console.log("NewsPullerService: Twitter Runtime not initialized");
@@ -417,11 +419,11 @@ export class NewsPullerService extends Service {
         //console.log("NewsPullerService: Twitter client", twitterClient);
         try {
             const roomId = stringToUuid(
-                "twitter_generate_room-" + profile.me.username
+                "twitter_generate_room-" + profile.username
             );
             await this.runtime.ensureUserExists(
                 this.runtime.agentId,
-                profile.me.username,
+                profile.username,
                 this.runtime.character.name,
                 "twitter"
             );
@@ -437,7 +439,7 @@ export class NewsPullerService extends Service {
                     },
                 },
                 {
-                    twitterUserName: profile.me.username,
+                    twitterUserName: profile.username,
                     maxTweetLength,
                     news: text,
                 }
