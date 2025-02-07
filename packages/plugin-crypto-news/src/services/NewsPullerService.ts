@@ -29,6 +29,7 @@ export const DEFAULT_MAX_TWEET_LENGTH = 280;
 export class NewsPullerService extends Service {
     private runtime: IAgentRuntime | null = null;
     private intervalId: NodeJS.Timeout | null = null;
+    private NEWS_POST_LIMIT;
     private DEFAULT_INTERVAL = 60 * 60 * 1000; // 1hr / 60 minutes
     private twitterClient;
     private me: Profile;
@@ -46,6 +47,9 @@ export class NewsPullerService extends Service {
             return;
         }
         const intv = Number(runtime.getSetting("NEWS_PULLER_INTERVAL"));
+        this.NEWS_POST_LIMIT = Number(
+            runtime.getSetting("NEWS_POST_LIMIT") || 3
+        );
         this.DEFAULT_INTERVAL = (intv ? intv : 60) * 60 * 1000;
         this.runtime = runtime;
         // init twitter
@@ -191,6 +195,7 @@ export class NewsPullerService extends Service {
             let tweetId;
             let tempNews = "";
             let count = 0;
+            let ittr = 0;
 
             for (const article of chainCatcher.data.list) {
                 const cached = await cacheManager.get(
@@ -230,11 +235,12 @@ export class NewsPullerService extends Service {
                     count++;
                     // post the tweet
                     if (
-                        count === 2 ||
-                        article.id ===
-                            chainCatcher.data.list[
-                                chainCatcher.data.list.length - 1
-                            ].id
+                        (count === 2 ||
+                            article.id ===
+                                chainCatcher.data.list[
+                                    chainCatcher.data.list.length - 1
+                                ].id) &&
+                        ittr < this.NEWS_POST_LIMIT
                     ) {
                         const tweetR = await this.generateTweet(
                             article.description,
@@ -245,6 +251,7 @@ export class NewsPullerService extends Service {
                         }
                         tempNews = "";
                         count = 0;
+                        ittr++;
                     }
                 } else {
                     console.log(
