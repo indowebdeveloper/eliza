@@ -181,10 +181,10 @@ export class NewsPullerService extends Service {
             console.log("NewsPullerService: Runtime not initialized");
             return;
         }
-        if (this.processingNews) {
-            console.log("NewsPullerService: Already processing news");
-        }
-        this.processingNews = true;
+        // if (this.processingNews) {
+        //     console.log("NewsPullerService: Already processing news");
+        // }
+        //this.processingNews = true;
 
         try {
             // fetch several times
@@ -199,7 +199,9 @@ export class NewsPullerService extends Service {
 
             for (const article of chainCatcher.data.list) {
                 const cached = await cacheManager.get(
-                    `cryptoNews_${this.runtime.agentId}_${article.id}`
+                    `cryptoNews_${stringToUuid(this.runtime.character.name)}_${
+                        article.id
+                    }`
                 );
                 if (!cached) {
                     // new acrticle
@@ -210,7 +212,9 @@ export class NewsPullerService extends Service {
                     //articles.push(article);
                     // cache it
                     await cacheManager.set(
-                        `cryptoNews_${this.runtime.agentId}_${article.id}`,
+                        `cryptoNews_${stringToUuid(
+                            this.runtime.character.name
+                        )}_${article.id}`,
                         article
                     );
                     const embedding = await embed(
@@ -222,7 +226,9 @@ export class NewsPullerService extends Service {
 
                     await this.runtime.ragKnowledgeManager.createKnowledge({
                         id: stringToUuid(
-                            `cryptoNews_${this.runtime.agentId}_${article.id}`
+                            `cryptoNews_${stringToUuid(
+                                this.runtime.character.name
+                            )}_${article.id}`
                         ),
                         agentId: this.runtime.agentId,
                         content: {
