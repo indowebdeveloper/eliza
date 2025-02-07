@@ -35,6 +35,10 @@ export class NewsPullerService extends Service {
     private DEFAULT_INTERVAL = 60 * 60 * 1000; // 1hr / 60 minutes
     private twitterClient: { id: string; client: any }[] = [];
     private me: Profile;
+    private profiles: {
+        id: string;
+        me: Profile;
+    }[] = [];
     private processingNews = false;
 
     static get serviceType(): ServiceType {
@@ -219,7 +223,11 @@ export class NewsPullerService extends Service {
 
                 await new Promise((resolve) => setTimeout(resolve, 2000));
             }
-            this.me = await this.twitterClient[tcIndex]?.client?.me();
+            //this.me = await this.twitterClient[tcIndex]?.client?.me();
+            this.profiles.push({
+                id: this.runtime.agentId,
+                me: await this.twitterClient[tcIndex]?.client?.me(),
+            });
         } else {
             console.log(
                 `TWITTER CLIENT ALREADY INITIALIZED, cant login ${this.runtime.getSetting(
@@ -396,6 +404,10 @@ export class NewsPullerService extends Service {
 
     private async generateTweet(text: any, tweetId?: string) {
         elizaLogger.log("NewsPuller : Generating tweet");
+        const profile = this.profiles.find(
+            (item) => item.id === this.runtime.agentId
+        );
+
         if (!this.runtime) {
             console.log("NewsPullerService: Twitter Runtime not initialized");
             return;
@@ -404,11 +416,11 @@ export class NewsPullerService extends Service {
         //console.log("NewsPullerService: Twitter client", twitterClient);
         try {
             const roomId = stringToUuid(
-                "twitter_generate_room-" + this.me.username
+                "twitter_generate_room-" + profile.me.username
             );
             await this.runtime.ensureUserExists(
                 this.runtime.agentId,
-                this.me.username,
+                profile.me.username,
                 this.runtime.character.name,
                 "twitter"
             );
@@ -424,7 +436,7 @@ export class NewsPullerService extends Service {
                     },
                 },
                 {
-                    twitterUserName: this.me.username,
+                    twitterUserName: profile.me.username,
                     maxTweetLength,
                     news: text,
                 }
