@@ -225,6 +225,7 @@ export class NewsPullerService extends Service {
             }
             //this.me = await this.twitterClient[tcIndex]?.client?.me();
             const me = await this.twitterClient[tcIndex]?.client?.me();
+            console.log("PUSHING ME TO PROFILES", me);
             this.profiles.push({
                 id: this.runtime.agentId,
                 me,
