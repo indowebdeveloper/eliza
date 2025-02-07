@@ -33,7 +33,7 @@ export class NewsPullerService extends Service {
     private tasksCount: { id: string; count: number }[] = [];
     private NEWS_POST_LIMIT;
     private DEFAULT_INTERVAL = 60 * 60 * 1000; // 1hr / 60 minutes
-    private twitterClient;
+    private twitterClient: { id: string; client: any }[];
     private me: Profile;
     private processingNews = false;
 
@@ -113,10 +113,23 @@ export class NewsPullerService extends Service {
     }
 
     private async twitterLogin() {
+        // saved client
+        const tClient = this.twitterClient.findIndex(
+            (item) => item.id === this.runtime.agentId
+        );
+        if (tClient) {
+            return;
+        }
         // initiate the twitter login
         const twitterClient =
             this.runtime.clients?.twitter?.client?.twitterClient;
-        this.twitterClient = twitterClient || new Scraper();
+        this.twitterClient.push({
+            id: this.runtime.agentId,
+            client: twitterClient || new Scraper(),
+        });
+        const tcIndex = this.twitterClient.findIndex(
+            (item) => item.id === this.runtime.agentId
+        );
         let retries = 3;
         console.log(
             `NEWS|LOGGING IN TWITTER CLIENT: ${this.runtime.getSetting(
@@ -156,24 +169,32 @@ export class NewsPullerService extends Service {
 
             while (retries > 0) {
                 try {
-                    if (await this.twitterClient.isLoggedIn()) {
+                    if (
+                        await this.twitterClient[tcIndex]?.client?.isLoggedIn()
+                    ) {
                         // cookies are valid, no login required
                         elizaLogger.info("Successfully logged in.");
                         break;
                     } else {
-                        await this.twitterClient.login(
+                        await this.twitterClient[tcIndex]?.client?.login(
                             username,
                             password,
                             email,
                             twitter2faSecret
                         );
-                        if (await this.twitterClient.isLoggedIn()) {
+                        if (
+                            await this.twitterClient[
+                                tcIndex
+                            ]?.client?.isLoggedIn()
+                        ) {
                             // fresh login, store new cookies
                             elizaLogger.info("Successfully logged in.");
                             elizaLogger.info("Caching cookies");
                             await this.cacheCookies(
                                 username,
-                                await this.twitterClient.getCookies()
+                                await this.twitterClient[
+                                    tcIndex
+                                ]?.client?.getCookies()
                             );
                             break;
                         }
@@ -198,7 +219,7 @@ export class NewsPullerService extends Service {
 
                 await new Promise((resolve) => setTimeout(resolve, 2000));
             }
-            this.me = await this.twitterClient.me();
+            this.me = await this.twitterClient[tcIndex]?.client?.me();
         } else {
             console.log(
                 `TWITTER CLIENT ALREADY INITIALIZED, cant login ${this.runtime.getSetting(
@@ -534,14 +555,14 @@ export class NewsPullerService extends Service {
         try {
             // Send the tweet
             elizaLogger.log("Attempting to send tweet:", content);
-
+            const tcIndex = this.twitterClient.findIndex(
+                (item) => item.id === this.runtime.agentId
+            );
             try {
                 if (content.length > DEFAULT_MAX_TWEET_LENGTH) {
-                    const noteTweetResult =
-                        await this.twitterClient.sendNoteTweet(
-                            content,
-                            tweetId
-                        );
+                    const noteTweetResult = await this.twitterClient[
+                        tcIndex
+                    ]?.client?.sendNoteTweet(content, tweetId);
                     if (
                         noteTweetResult.errors &&
                         noteTweetResult.errors.length > 0
@@ -575,7 +596,13 @@ export class NewsPullerService extends Service {
     }
 
     private async sendTweet(content: string, tweetId: string | null) {
-        const result = await this.twitterClient.sendTweet(content, tweetId);
+        const tcIndex = this.twitterClient.findIndex(
+            (item) => item.id === this.runtime.agentId
+        );
+        const result = await this.twitterClient[tcIndex]?.client?.sendTweet(
+            content,
+            tweetId
+        );
 
         const body = await result.json();
         //console.dir(body, { depth: null, colors: true });
@@ -632,20 +659,33 @@ export class NewsPullerService extends Service {
                     cookie.httpOnly ? "HttpOnly" : ""
                 }; SameSite=${cookie.sameSite || "Lax"}`
         );
-        await this.twitterClient.setCookies(cookieStrings);
+        const tcIndex = this.twitterClient.findIndex(
+            (item) => item.id === this.runtime.agentId
+        );
+        await this.twitterClient[tcIndex]?.client?.setCookies(cookieStrings);
     }
 
     // Method to stop the service
     stop(): void {
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
-            this.intervalId = null;
-            NewsPullerService.activeTaskCount--;
+        const intervalIdsIdx = this.intervalIds.findIndex(
+            (item) => item.id === this.runtime.agentId
+        );
+        const taskCountIdx = this.tasksCount.findIndex(
+            (item) => item.id == this.runtime.agentId
+        );
+        const intervalId = this.intervalIds[intervalIdsIdx];
+        const taskCount = this.tasksCount[taskCountIdx];
+        if (intervalId?.timeout) {
+            clearInterval(intervalId?.timeout);
+            //this.intervalId = null;
+            this.intervalIds.splice(intervalIdsIdx, 1);
+            this.tasksCount.splice(taskCountIdx, 1);
+            //NewsPullerService.activeTaskCount--;
             console.log(
-                `NewsPullerService stopped (active tasks: ${NewsPullerService.activeTaskCount})`
+                `NewsPullerService stopped for agent: ${this.runtime.agentId}`
             );
         }
-        NewsPullerService.isInitialized = false;
+        //NewsPullerService.isInitialized = false;
     }
 
     // Method to manually trigger a sample fetch (for testing)
