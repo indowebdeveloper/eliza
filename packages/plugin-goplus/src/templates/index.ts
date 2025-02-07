@@ -36,7 +36,7 @@ Available actions:
 \`\`\`json
 {
 "type": "EVMTOKEN_SECURITY_CHECK"
-"network": "1", //default: 1 (Ethereum:1, Optimism:10, Cronos:25, BSC:56, Gnosis:100, HECO:128, Polygon:137, Fantom:250, KCC:321, zkSync Era:324, ETHW:10001, FON:201022, Arbitrum:42161, Avalanche:43114, Linea Mainnet:59144, Base:8453, Tron:tron, Scroll:534352, opBNB:204, Mantle:5000, ZKFair:42766, Blast:81457, Manta Pacific:169, Berachain Artio Testnet:80085, Merlin:4200, Bitlayer Mainnet:200901, zkLink Nova:810180, X Layer Mainnet:196)
+"network": "1", //default: 1 (Ethereum:1, Optimism:10, Cronos:25, BSC:56, Gnosis:100, HECO:128, Polygon:137, Fantom:250, KCC:321, zkSync Era:324, ETHW:10001, FON:201022, Arbitrum:42161, Avalanche:43114, Linea Mainnet:59144, Base:8453, Tron:tron, Scroll:534352, opBNB:204, Mantle:5000, ZKFair:42766, Blast:81457, Manta Pacific:169, Berachain Artio Testnet:80085, Merlin:4200, Bitlayer Mainnet:200901, zkLink Nova:810180, X Layer Mainnet:196, Bera:80094)
 "token": "" ,
 }
 \`\`\`
@@ -76,7 +76,7 @@ Available actions:
 \`\`\`json
 {
 "type": "RUGPULL_SECURITY_CHECK"
-"network": "1", //default: 1 (Ethereum:1, BSC:56)
+"network": "1", //default: 1 (Ethereum:1, BSC:56, Bera:80094)
 "contract": "" | null,
 }
 \`\`\`
@@ -89,7 +89,7 @@ important: do not response anything except json`;
 export const responsePrompt = (
     apiresult: string,
     text: string
-) => `You are a security action detector for blockchain interactions. Your task is to analyze the security API’s response from NeoCorteX and summary the API result.
+) => `You are a security action detector for blockchain interactions. Your task is to analyze the security API’s response from Neo Knowledge and summary the API result.
 API to analyze:“”"
 ${apiresult}
 “”"
