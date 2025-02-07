@@ -43,9 +43,9 @@ export class NewsPullerService extends Service {
 
     async initialize(runtime: IAgentRuntime): Promise<void> {
         // Verify if the service is already initialized
-        if (NewsPullerService.isInitialized) {
-            return;
-        }
+        // if (NewsPullerService.isInitialized) {
+        //     return;
+        // }
         const intv = Number(runtime.getSetting("NEWS_PULLER_INTERVAL"));
         this.NEWS_POST_LIMIT = Number(
             runtime.getSetting("NEWS_POST_LIMIT") || 3
@@ -98,6 +98,11 @@ export class NewsPullerService extends Service {
             this.runtime.clients?.twitter?.client?.twitterClient;
         this.twitterClient = twitterClient || new Scraper();
         let retries = 3;
+        console.log(
+            `NEWS|LOGGING IN TWITTER CLIENT: ${this.runtime.getSetting(
+                "TWITTER_USERNAME"
+            )}`
+        );
         if (!twitterClient) {
             const username = this.runtime.getSetting("TWITTER_USERNAME");
             const password = this.runtime.getSetting("TWITTER_PASSWORD");
@@ -174,6 +179,12 @@ export class NewsPullerService extends Service {
                 await new Promise((resolve) => setTimeout(resolve, 2000));
             }
             this.me = await this.twitterClient.me();
+        } else {
+            console.log(
+                `TWITTER CLIENT ALREADY INITIALIZED, cant login ${this.runtime.getSetting(
+                    "TWITTER_USERNAME"
+                )}`
+            );
         }
     }
     private async fetchSample(): Promise<void> {
