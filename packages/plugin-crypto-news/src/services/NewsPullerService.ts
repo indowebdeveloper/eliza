@@ -29,6 +29,8 @@ export const DEFAULT_MAX_TWEET_LENGTH = 280;
 export class NewsPullerService extends Service {
     private runtime: IAgentRuntime | null = null;
     private intervalId: NodeJS.Timeout | null = null;
+    private intervalIds: { id: string; timeout: NodeJS.Timeout }[] = [];
+    private tasksCount: { id: string; count: number }[] = [];
     private NEWS_POST_LIMIT;
     private DEFAULT_INTERVAL = 60 * 60 * 1000; // 1hr / 60 minutes
     private twitterClient;
@@ -56,7 +58,7 @@ export class NewsPullerService extends Service {
         await this.twitterLogin();
         // Start the periodic task
         await this.startPeriodicTask();
-        NewsPullerService.isInitialized = true;
+        //NewsPullerService.isInitialized = true;
         console.log(
             `NewsPullerService : initialized and started periodic task (interval: ${this.DEFAULT_INTERVAL} ms || ${intv})`
         );
@@ -66,7 +68,17 @@ export class NewsPullerService extends Service {
 
     private async startPeriodicTask(): Promise<void> {
         // Verify if a task is already active
-        if (NewsPullerService.activeTaskCount > 0) {
+        //if (NewsPullerService.activeTaskCount > 0) {
+        const taskCountIdx = this.tasksCount.findIndex(
+            (item) => item.id === this.runtime.agentId
+        );
+        const intervalIdsIdx = this.intervalIds.findIndex(
+            (item) => item.id === this.runtime.agentId
+        );
+
+        const taskCount = this.tasksCount[taskCountIdx];
+        const intervalId = this.intervalIds[intervalIdsIdx];
+        if (taskCount?.count > 0) {
             console.log(
                 "NewsPullerService: Periodic task already running, skipping"
             );
@@ -74,22 +86,30 @@ export class NewsPullerService extends Service {
         }
 
         // Clear any existing interval
-        if (this.intervalId) {
-            clearInterval(this.intervalId);
+        if (intervalId?.timeout) {
+            clearInterval(intervalId?.timeout);
         }
 
-        NewsPullerService.activeTaskCount++;
+        //NewsPullerService.activeTaskCount++;
+        this.tasksCount.push({
+            id: this.runtime.agentId,
+            count: 1,
+        });
         console.log(
-            `SampleService: Starting periodic task (active tasks: ${NewsPullerService.activeTaskCount})`
+            `NewsService: Starting periodic task (active tasks for: ${this.runtime.agentId})`
         );
 
         // Initial call immediately
         await this.fetchSample();
 
         // Set up periodic calls
-        this.intervalId = setInterval(async () => {
+        const inter = setInterval(async () => {
             await this.fetchSample();
         }, this.DEFAULT_INTERVAL);
+        this.intervalIds.push({
+            id: this.runtime.agentId,
+            timeout: inter,
+        });
     }
 
     private async twitterLogin() {
