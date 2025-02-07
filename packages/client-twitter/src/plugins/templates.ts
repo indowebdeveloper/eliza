@@ -74,7 +74,7 @@ export const twitterVoiceHandlerTemplate =
     About {{agentName}}:
     {{bio}}
 
-    # Areas of Expertise
+    # Areas of Expertise / Knowledge About Context
     {{knowledge}}
 
     # Attachments

@@ -22,7 +22,7 @@ import { buildConversationThread, sendTweet, wait } from "./utils.ts";
 
 export const twitterMessageHandlerTemplate =
     `
-# Areas of Expertise
+# Areas of Expertise / Knowledge About Context
 {{knowledge}}
 
 # About {{agentName}} (@{{twitterUserName}}):

@@ -36,7 +36,7 @@ import { buildConversationThread, fetchMediaData } from "./utils.ts";
 const MAX_TIMELINES_TO_FETCH = 15;
 
 const twitterPostTemplate = `
-# Areas of Expertise
+# Areas of Expertise / Knowledge About Context
 {{knowledge}}
 
 # About {{agentName}} (@{{twitterUserName}}):
