@@ -674,7 +674,7 @@ export class NewsPullerService extends Service {
             (item) => item.id == this.runtime.agentId
         );
         const intervalId = this.intervalIds[intervalIdsIdx];
-        const taskCount = this.tasksCount[taskCountIdx];
+        //const taskCount = this.tasksCount[taskCountIdx];
         if (intervalId?.timeout) {
             clearInterval(intervalId?.timeout);
             //this.intervalId = null;
