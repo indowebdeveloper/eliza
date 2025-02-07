@@ -33,7 +33,7 @@ export class NewsPullerService extends Service {
     private tasksCount: { id: string; count: number }[] = [];
     private NEWS_POST_LIMIT;
     private DEFAULT_INTERVAL = 60 * 60 * 1000; // 1hr / 60 minutes
-    private twitterClient: { id: string; client: any }[];
+    private twitterClient: { id: string; client: any }[] = [];
     private me: Profile;
     private processingNews = false;
 
