@@ -60,7 +60,10 @@ Here is the current post text again. Remember to include an action if the curren
 Here is the descriptions of images in the Current post.
 {{imageDescriptions}}
 
-# ADDITIONAL NOTES : If there's any image descriptions, please include the conclusion of the image description within your context. You shouldnt discard any information from the image descriptions. You should make the image description as your additional topic to react or respond. If there's no image descriptions, you can ignore this part.
+ADDITIONAL CONTEXT FROM IMAGES : If there's any image descriptions ( begin with "Images in Tweet:" text without quote) you must :
+1. Include the conclusion of the image description within your context.
+2. You should make the image description as your additional topic to react or respond.
+3. If there's no image descriptions, you can ignore this part.
 ` + messageCompletionFooter;
 
 export const twitterShouldRespondTemplate = (targetUsersStr: string) =>
